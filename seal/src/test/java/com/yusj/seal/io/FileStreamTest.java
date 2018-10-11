@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
@@ -22,7 +23,8 @@ public class FileStreamTest {
     public void testFileOutputStream() throws IOException {
 
         //创建一个模式为替换（即在写入前会将文件中的所有内容清空、如果文件存在的话）的文件字节输出流。
-        FileOutputStream fosAppendFalse = new FileOutputStream(new File("D:\\fosAppendFalse.txt"));
+        FileOutputStream fosAppendFalse = new FileOutputStream(new File("C:" + File.separator + "Users" + File.separator +
+                "Public" + File.separator + "IdeaTest" + File.separator +"fosAppendFalse.txt"));
         /**
          * 方法说明：
          * 1）写入一个字节；
@@ -51,7 +53,8 @@ public class FileStreamTest {
          */
 
         //创建一个模式为追加的文件字节输出流
-        FileOutputStream fosAppendTure = new FileOutputStream("D:\\fosAppendTure.txt", true);
+        FileOutputStream fosAppendTure = new FileOutputStream("C:" + File.separator + "Users" + File.separator +
+                "Public" + File.separator + "IdeaTest" + File.separator +"fosAppendTure.txt", true);
         /**
          * 方法说明：
          * 1）向指定文件追加一个字节；
@@ -83,11 +86,13 @@ public class FileStreamTest {
     @Test
     public void testFileInputSteram() throws IOException {
         //上面的FileOutputStream为了测试、写入文件的东西比较凌乱、下面为了方便观察结果、从新弄一个：将a-z写入文件fis.txt中、将fis.txt作为文件字节输入流的源。
-        FileOutputStream fos = new FileOutputStream("D:\\fis.txt");
+        FileOutputStream fos = new FileOutputStream("C:" + File.separator + "Users" + File.separator +
+                "Public" + File.separator + "IdeaTest" + File.separator +"fis.txt");
         fos.write(byteArray);
 
         //创建fis.txt的输入流
-        FileInputStream fis = new FileInputStream(new File("D:\\fis.txt"));
+        FileInputStream fis = new FileInputStream(new File("C:" + File.separator + "Users" + File.separator +
+                "Public" + File.separator + "IdeaTest" + File.separator +"fis.txt"));
 
         /**
          * 简单说明：
@@ -164,8 +169,10 @@ public class FileStreamTest {
     @Test
     public void copyFile() throws IOException {
         //结合使用、实现复制文件、这里没有对流油任何装饰、后面再说。
-        FileInputStream fis = new FileInputStream(new File("D:\\fosAppendFalse.txt"));
-        FileOutputStream fosAppendFalse = new FileOutputStream(new File("D:\\CopeOfFosAppendFalse.txt"));
+        FileInputStream fis = new FileInputStream(new File("C:" + File.separator + "Users" + File.separator +
+                "Public" + File.separator + "IdeaTest" + File.separator +"fosAppendFalse.txt"));
+        FileOutputStream fosAppendFalse = new FileOutputStream(new File("C:" + File.separator + "Users" + File.separator +
+                "Public" + File.separator + "IdeaTest" + File.separator +"CopeOfFosAppendFalse.txt"));
         byte[] b = new byte[1024];
         int n = 0;
         while ((n = fis.read(b)) != -1) {

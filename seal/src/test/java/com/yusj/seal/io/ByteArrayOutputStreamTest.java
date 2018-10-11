@@ -3,6 +3,7 @@ package com.yusj.seal.io;
 import org.junit.Test;
 
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -22,7 +23,7 @@ public class ByteArrayOutputStreamTest {
     public void test() throws IOException {
 
         //一般创建一个带有默认大小的缓存字节数组  buf 的字节输出流就可以了。
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
 
         //字节数组输出流中的 buf 中有效的字节数、缓存字节数组是存在程序内存中的。
         System.out.println(baos.size());
@@ -60,7 +61,10 @@ public class ByteArrayOutputStreamTest {
          * 至于为什么不是字节型、这与FileOutputStream的write(byte[] b, 0, len);有关、后面讨论。
          *
          */
-//        baos.writeTo(new FileOutputStream(new File("D:" + File.separator + "bytearrayoutputstream.txt")));
+
+        //C:\Users\Public\IdeaTest
+        baos.writeTo(new java.io.FileOutputStream(new File("C:" + File.separator + "Users" + File.separator +
+                "Public" + File.separator + "IdeaTest" + File.separator + "bytearrayoutputstream.txt")));
 
         /**
          * 将缓存数组清零
@@ -71,6 +75,8 @@ public class ByteArrayOutputStreamTest {
         System.out.println("缓存字节数组清零前：" + baos.size());
         baos.reset();
         System.out.println("缓存字节数组清零后：" + baos.size());
+        baos.write(byteArray, 0, 4);
+        System.out.println(baos.toString());
     }
 
 }

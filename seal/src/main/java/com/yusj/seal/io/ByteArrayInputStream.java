@@ -77,6 +77,7 @@ public class ByteArrayInputStream extends InputStream {
      */
     @Override
     public synchronized int read() {
+
         return (pos < count) ? (buf[pos++] & 0xff) : -1;
     }
 

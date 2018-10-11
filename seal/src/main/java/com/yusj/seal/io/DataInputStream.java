@@ -6,30 +6,54 @@ import java.io.PushbackInputStream;
 import java.io.UTFDataFormatException;
 
 /**
- * @Description
+ * DataInputStrem 数据字节输入流、我们已经知道、FilterInputStream是一个装饰器、
+ * * 他的子类就是为传入的InputStream子类添加新的功能、DataInputStrem作为FilterInputStream
+ * * 的一个实现类就是为传入的InputStream子类提供：
+ * * 应用程序将java的原始数据以一种与机器无关的方式读入、然后可以使用对应的DataOutputStream写入传入InputStream实现类自定的目的地中。
+ *
  * @Author kakalgy
  * @Date 2018/10/10 23:57
  **/
 public class DataInputStream extends FilterInputStream implements DataInput {
+    /**
+     * 调用父类FilterInputStream构造方法、在传入的InputStream实现类基础上创建DataInputStream;
+     */
     public DataInputStream(InputStream in) {
         super(in);
     }
 
+    /**
+     * readUTF方法使用的初始化数组
+     */
     private byte bytearr[] = new byte[80];
     private char chararr[] = new char[80];
 
+    /**
+     * 调用传入的InputStream实现类（以下简称：in）的read(byte b ,int off, int len)方法读取字节数组;
+     * 装饰器设计模式的本质：在保留组件原有功能的同时为现有被修饰的组件添加新功能;
+     * 至于这里为什么不调用：in.read(byte[] b)、很简单、in.read(byte[] b)本身就是调用in.read(byte[]b ,int off, int len)来实现的、何必还要走弯路;
+     */
     public final int read(byte b[]) throws IOException {
         return in.read(b, 0, b.length);
     }
 
+    /**
+     * 调用in.read(byte[]b ,int off, int len)读取len个字节;
+     */
     public final int read(byte b[], int off, int len) throws IOException {
         return in.read(b, off, len);
     }
 
+    /**
+     * 调用自己的 readFully(byte[] b,int off, int len)读取b.length个字节;为DataInput中定义的方法
+     */
     public final void readFully(byte b[]) throws IOException {
         readFully(b, 0, b.length);
     }
 
+    /**
+     * 从in中读取len个字节、为DataInput中定义的方法
+     */
     public final void readFully(byte b[], int off, int len) throws IOException {
         if (len < 0)
             throw new IndexOutOfBoundsException();
@@ -42,6 +66,9 @@ public class DataInputStream extends FilterInputStream implements DataInput {
         }
     }
 
+    /**
+     * 跳过in的前n个字节、并在以后的读取中不再读取这些字节。
+     */
     public final int skipBytes(int n) throws IOException {
         int total = 0;
         int cur = 0;
@@ -53,6 +80,9 @@ public class DataInputStream extends FilterInputStream implements DataInput {
         return total;
     }
 
+    /**
+     * 用于读取DataOut接口writeBoolean方法写入的字节。
+     */
     public final boolean readBoolean() throws IOException {
         int ch = in.read();
         if (ch < 0)
@@ -60,6 +90,10 @@ public class DataInputStream extends FilterInputStream implements DataInput {
         return (ch != 0);
     }
 
+    /**
+     * 用于读取DataOut接口writeByte()方法写入的字节、该字节被看作是 -128 到 127（包含）范围内的一个有符号值。
+     * 即返回的仍是一个byte、而非转换后的无符号的int、从结果的返回处理也能看出来。
+     */
     public final byte readByte() throws IOException {
         int ch = in.read();
         if (ch < 0)
@@ -67,6 +101,10 @@ public class DataInputStream extends FilterInputStream implements DataInput {
         return (byte) (ch);
     }
 
+    /**
+     * 读取一个输入字节，将它左侧补零 (zero-extend) 转变为 int 类型，并返回结果，所以结果的范围是 0 到 255。
+     * 如果接口 DataOutput 的 writeByte 方法的参数是 0 到 255 之间的值，则此方法适用于读取用 writeByte 写入的字节。
+     */
     public final int readUnsignedByte() throws IOException {
         int ch = in.read();
         if (ch < 0)
@@ -74,6 +112,9 @@ public class DataInputStream extends FilterInputStream implements DataInput {
         return ch;
     }
 
+    /**
+     * 读取两个输入字节并返回一个 short 值。
+     */
     public final short readShort() throws IOException {
         int ch1 = in.read();
         int ch2 = in.read();
@@ -82,6 +123,10 @@ public class DataInputStream extends FilterInputStream implements DataInput {
         return (short) ((ch1 << 8) + (ch2 << 0));
     }
 
+    /**
+     * 读取两个输入字节，并返回 0 到 65535 范围内的一个 int 值。
+     * 如果接口 DataOutput 的 writeShort 方法的参数是 0 到 65535 范围内的值，则此方法适用于读取用 writeShort 写入的字节。
+     */
     public final int readUnsignedShort() throws IOException {
         int ch1 = in.read();
         int ch2 = in.read();
@@ -90,6 +135,9 @@ public class DataInputStream extends FilterInputStream implements DataInput {
         return (ch1 << 8) + (ch2 << 0);
     }
 
+    /**
+     * 读取两个输入字节并返回一个 char 值。
+     */
     public final char readChar() throws IOException {
         int ch1 = in.read();
         int ch2 = in.read();
@@ -98,6 +146,9 @@ public class DataInputStream extends FilterInputStream implements DataInput {
         return (char) ((ch1 << 8) + (ch2 << 0));
     }
 
+    /**
+     * 读取四个输入字节并返回一个int 值
+     */
     public final int readInt() throws IOException {
         int ch1 = in.read();
         int ch2 = in.read();
@@ -110,6 +161,9 @@ public class DataInputStream extends FilterInputStream implements DataInput {
 
     private byte readBuffer[] = new byte[8];
 
+    /**
+     * 读取8个输入字节并返回一个long 值
+     */
     public final long readLong() throws IOException {
         readFully(readBuffer, 0, 8);
         return (((long) readBuffer[0] << 56) +
@@ -122,16 +176,25 @@ public class DataInputStream extends FilterInputStream implements DataInput {
                 ((readBuffer[7] & 255) << 0));
     }
 
+    /**
+     * 读取四个字节并返回一个float 值
+     */
     public final float readFloat() throws IOException {
         return Float.intBitsToFloat(readInt());
     }
 
+    /**
+     * 读取8个字节并返回一个double值
+     */
     public final double readDouble() throws IOException {
         return Double.longBitsToDouble(readLong());
     }
 
     private char lineBuffer[];
 
+    /**
+     * 此方法已废弃、不再过多关注
+     */
     @Deprecated
     public final String readLine() throws IOException {
         char buf[] = lineBuffer;
@@ -153,12 +216,13 @@ public class DataInputStream extends FilterInputStream implements DataInput {
 
                 case '\r':
                     int c2 = in.read();
-                    if ((c2 != '\n') && (c2 != -1)) {
-                        if (!(in instanceof PushbackInputStream)) {
-                            this.in = new PushbackInputStream(in);
-                        }
-                        ((PushbackInputStream) in).unread(c2);
-                    }
+                    //由于内部原因无法生成代码
+//                    if ((c2 != '\n') && (c2 != -1)) {
+//                        if (!(in instanceof PushbackInputStream)) {
+//                            this.in = new PushbackInputStream(in);
+//                        }
+//                        ((PushbackInputStream) in).unread(c2);
+//                    }
                     break loop;
 
                 default:
@@ -178,11 +242,19 @@ public class DataInputStream extends FilterInputStream implements DataInput {
         return String.copyValueOf(buf, 0, offset);
     }
 
+    /**
+     * 调用下方的readUTF(DataInut in)
+     */
     public final String readUTF() throws IOException {
         return readUTF(this);
     }
 
+    /**
+     * 读取输入流中的一串有序字节字节、并转换成String返回
+     */
     public final static String readUTF(DataInput in) throws IOException {
+        // 从“数据输入流”中读取“无符号的short类型”的值：
+        // 从DataOutputStream 的 writeUTF(String str)方法知道此方法读取的前2个字节是数据的长度
         int utflen = in.readUnsignedShort();
         byte[] bytearr = null;
         char[] chararr = null;
