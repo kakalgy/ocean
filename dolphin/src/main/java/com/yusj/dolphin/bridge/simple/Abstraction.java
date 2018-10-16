@@ -8,6 +8,7 @@ public abstract class Abstraction {
     }
 
     public void setImplementor(Implementor implementor) {
+
         this.implementor = implementor;
     }
 
