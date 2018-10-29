@@ -7,11 +7,15 @@
     <groupId>com.yusj</groupId>
     <artifactId>ocean</artifactId>
     <packaging>pom</packaging>
-    <version>1.0</version>
+    <version>${ocean.version}</version>
     <modules>
         <module>seal</module>
         <module>dolphin</module>
+        <module>seahorse</module>
+        <module>starfish</module>
     </modules>
 
-
+    <properties>
+        <ocean.version>1.0</ocean.version>
+    </properties>
 </project>
