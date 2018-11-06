@@ -14,7 +14,7 @@ public class OperatorStateMain {
 
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+//        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
         env.enableCheckpointing(60000);
         CheckpointConfig checkpointConfig = env.getCheckpointConfig();
