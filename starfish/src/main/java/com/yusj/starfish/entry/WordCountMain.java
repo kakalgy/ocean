@@ -54,7 +54,7 @@ public class WordCountMain {
                     }
                 }).keyBy(0).timeWindow(Time.seconds(30)).reduce(new ReduceFunction<Tuple2<String, Integer>>() {
                     public Tuple2<String, Integer> reduce(Tuple2<String, Integer> a, Tuple2<String, Integer> b) {
-                        return new Tuple2<String, Integer>(a.f0, a.f1 + b.f1);
+                        return new Tuple2<>(a.f0, a.f1 + b.f1);
                     }
                 })
                 // .addSink(new SinkFunction<Tuple2<String, Integer>>() {
