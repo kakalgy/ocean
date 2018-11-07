@@ -37,7 +37,7 @@ public class CountWithKeyesState extends RichFlatMapFunction<Tuple2<Long, Long>,
 
         //if the count reaches 2, wait the avarage and clear the state
         if (currentSum.f0 >= 3) {
-            output.collect(new Tuple2<Long, Long>(input.f0, currentSum.f1 / currentSum.f0));
+            output.collect(new Tuple2<>(input.f0, currentSum.f1 / currentSum.f0));
             sum.clear();
         }
     }

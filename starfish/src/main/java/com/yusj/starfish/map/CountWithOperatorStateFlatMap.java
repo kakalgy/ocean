@@ -12,12 +12,18 @@ import org.apache.flink.runtime.state.FunctionSnapshotContext;
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.util.Collector;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CountWithOperatorStateFlatMap extends RichFlatMapFunction<Long, String> implements CheckpointedFunction {
 
     private transient ListState<Long> checkPointCountList;
     private List<Long> listElements;
+
+    public CountWithOperatorStateFlatMap() {
+        System.out.println("CountWithOperatorStateFlatMap Constructor");
+        this.listElements = new ArrayList<>();
+    }
 
     @Override
     public void flatMap(Long input, Collector<String> collector) throws Exception {
@@ -40,7 +46,7 @@ public class CountWithOperatorStateFlatMap extends RichFlatMapFunction<Long, Str
         System.out.println("####snapshotState start####");
         checkPointCountList.clear();
         for (Long i : listElements) {
-            System.out.print(i);
+            System.out.print(i + ", ");
             checkPointCountList.add(i);
         }
         System.out.println();
@@ -57,12 +63,13 @@ public class CountWithOperatorStateFlatMap extends RichFlatMapFunction<Long, Str
 
         if (functionInitializationContext.isRestored()) {
             for (Long i : checkPointCountList.get()) {
-                System.out.print(i);
+                System.out.println(i);
                 listElements.add(i);
             }
         }
-        System.out.println();
+
         System.out.println("%%%%initializeState end%%%%");
+        System.out.println();
 
     }
 }
