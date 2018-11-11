@@ -23,21 +23,32 @@ public class KeyedStateMain {
         CheckpointConfig checkpointConfig = env.getCheckpointConfig();
         checkpointConfig.setMinPauseBetweenCheckpoints(30000L);
         checkpointConfig.setCheckpointTimeout(10000L);
-        checkpointConfig.enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+        checkpointConfig.enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.DELETE_ON_CANCELLATION);
 
         //使用Socket作为数据源
         SocketSource socketSource = new SocketSource(args);
-        env.socketTextStream(socketSource.getHostName(), socketSource.getPort(), "\n").map(new MapFunction<String, Tuple2<Long, Long>>() {
-            public Tuple2<Long, Long> map(String s) throws Exception {
-                String[] str = s.split(",");
-                return new Tuple2<Long, Long>(Long.parseLong(str[0]), Long.parseLong(str[1]));
-            }
-        }).flatMap(new CountWithKeyesState()).addSink(new SinkFunction<Tuple2<Long, Long>>() {
-            public void invoke(Tuple2<Long, Long> value, Context context) throws Exception {
+        env.socketTextStream(socketSource.getHostName(), socketSource.getPort(), "\n")
+                .map(s -> {
+                    String[] str = s.split(",");
+                    return new Tuple2<>(Long.parseLong(str[0]), Long.parseLong(str[1]));
+                })
+//                .map(new MapFunction<String, Tuple2<Long, Long>>() {
+//            public Tuple2<Long, Long> map(String s) throws Exception {
+//                String[] str = s.split(",");
+//                return new Tuple2<Long, Long>(Long.parseLong(str[0]), Long.parseLong(str[1]));
+//            }
+//    }).
 
-            }
-        });
+                .keyBy(0).
 
-        env.execute("OperatorStateMain");
+                flatMap(new CountWithKeyesState()).
+
+                addSink(new SinkFunction<Tuple2<Long, Long>>() {
+                    public void invoke(Tuple2<Long, Long> value, Context context) throws Exception {
+                        System.out.println("sink result: " + value.f0 + ": " + value.f1);
+                    }
+                });
+
+        env.execute("KeyedStateMain");
     }
 }
