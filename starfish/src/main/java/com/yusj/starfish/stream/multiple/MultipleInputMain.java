@@ -4,13 +4,11 @@ import com.yusj.starfish.source.SocketSource;
 import com.yusj.starfish.stream.map.FishStateFlatMap;
 import com.yusj.starfish.stream.map.FishStateTupleFlatMap;
 import com.yusj.starfish.stream.pojo.FishState;
-import org.apache.flink.api.common.functions.AggregateFunction;
-import org.apache.flink.api.common.functions.FoldFunction;
-import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.functions.ReduceFunction;
+import org.apache.flink.api.common.functions.*;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.serialization.TypeInformationSerializationSchema;
 import org.apache.flink.api.common.typeinfo.TypeHint;
+import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple1;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -21,12 +19,14 @@ import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SplitStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
+import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
+import org.apache.flink.util.Collector;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 
-import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -114,7 +114,20 @@ public class MultipleInputMain {
         ////
         ////////////////////////////////////////////////
         //project 将first流的结构由Tuple3<String, Long, Long>改为Tuple2<Long, String>
-        DataStream<Tuple2<Long, String>> firstProjectStream = first.project(2, 0);
+        DataStream<Tuple2<Long, String>> firstProjectStream = first.project(1, 0);
+        KeyedStream<Tuple2<Long, String>, Tuple> firstKeyedStream = firstProjectStream.keyBy(1);
+        firstKeyedStream.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(20))).apply(new AllWindowFunction<Tuple2<Long, String>, FishState, TimeWindow>() {
+            @Override
+            public void apply(TimeWindow window, Iterable<Tuple2<Long, String>> values, Collector<FishState> out) throws Exception {
+                long count = 0L;
+                for (Tuple2<Long, String> v : values) {
+                    count += v.f0;
+                }
+                FishState fishState = new FishState("final", count, System.currentTimeMillis());
+                System.out.println("firstKeyedStream.windowAll: " + fishState);
+                out.collect(fishState);
+            }
+        });
 
 
         ////////////////////////////////////////////////
@@ -179,12 +192,14 @@ public class MultipleInputMain {
             @Override
             public Tuple3<String, Long, FishState> reduce(Tuple3<String, Long, FishState> value1, Tuple3<String, Long, FishState> value2) throws Exception {
 
-                return new Tuple3<>(value1.f0, value1.f1 + value1.f1, value2.f2);
+                Tuple3<String, Long, FishState> tuple = new Tuple3<>(value1.f0, value1.f1 + value1.f1, value2.f2);
+                System.out.println("forthKeyStream.window: " + tuple.f0 + ", " + tuple.f1 + ", " + tuple.f2);
+                return tuple;
             }
         }).windowAll(TumblingProcessingTimeWindows.of(Time.seconds(20))).sum(1).addSink(new SinkFunction<Tuple3<String, Long, FishState>>() {
             @Override
             public void invoke(Tuple3<String, Long, FishState> value, Context context) throws Exception {
-                System.out.println("forthKeyStream: " + value.f0 + ", " + value.f1 + ", " + value.f2);
+                System.out.println("forthKeyStream.windowAll: " + value.f0 + ", " + value.f1 + ", " + value.f2);
             }
         });
 
@@ -193,6 +208,27 @@ public class MultipleInputMain {
         ////    Dozens
         ////
         ////////////////////////////////////////////////
+        DataStream<Tuple3<String, Long, FishState>> dozensFlatMapStream = dozens.flatMap(new FishStateTupleFlatMap());
+        dozensFlatMapStream.join(forthFlatMapStream).where(new KeySelector<Tuple3<String, Long, FishState>, String>() {
+            @Override
+            public String getKey(Tuple3<String, Long, FishState> value) throws Exception {
+                return value.f0;
+            }
+        }).equalTo(new KeySelector<Tuple3<String, Long, FishState>, String>() {
+            @Override
+            public String getKey(Tuple3<String, Long, FishState> value) throws Exception {
+                return value.f0;
+            }
+        }).window(TumblingProcessingTimeWindows.of(Time.seconds(20))).apply(new JoinFunction<Tuple3<String, Long, FishState>, Tuple3<String, Long, FishState>, FishState>() {
+            @Override
+            public FishState join(Tuple3<String, Long, FishState> first, Tuple3<String, Long, FishState> second) throws Exception {
+                FishState fishState = new FishState(first.f0, first.f1 + second.f1, second.f2.getTimestamp());
+                System.out.println("dozensFlatMapStream.join: " + fishState);
+                return fishState;
+            }
+        });
+
+        KeyedStream<Tuple3<String, Long, FishState>, Tuple> dozensKeyStream = dozensFlatMapStream.keyBy(0);
 
 
 //        source.print();
