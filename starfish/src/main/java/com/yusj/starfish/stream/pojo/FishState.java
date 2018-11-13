@@ -37,4 +37,9 @@ public class FishState {
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }
+
+    @Override
+    public String toString() {
+        return "name: " + this.fishName + ", count: " + this.getCount() + ", timestamp: " + this.getTimestamp();
+    }
 }

@@ -52,11 +52,13 @@ public class WordCountMain {
                             // System.out.println(word);
                         }
                     }
-                }).keyBy(0).timeWindow(Time.seconds(30)).reduce(new ReduceFunction<Tuple2<String, Integer>>() {
-                    public Tuple2<String, Integer> reduce(Tuple2<String, Integer> a, Tuple2<String, Integer> b) {
-                        return new Tuple2<>(a.f0, a.f1 + b.f1);
-                    }
-                })
+                }).keyBy(0)
+//                .timeWindow(Time.seconds(30)).reduce(new ReduceFunction<Tuple2<String, Integer>>() {
+//                    public Tuple2<String, Integer> reduce(Tuple2<String, Integer> a, Tuple2<String, Integer> b) {
+//                        return new Tuple2<>(a.f0, a.f1 + b.f1);
+//                    }
+//                })
+
                 // .addSink(new SinkFunction<Tuple2<String, Integer>>() {
                 // @Override
                 // public void invoke(Tuple2<String, Integer> value) throws Exception {
