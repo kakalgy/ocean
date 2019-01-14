@@ -31,8 +31,8 @@ public class HighLevelConsumer {
         props.put("auto.offset.reset", "smallest");
         props.put("auto.offset.enable", "true");
         props.put("auto.offset.interval.ms", "6000");
-        props.put("offsets.storage", "kafka");
-        props.put("dual.commit","true");
+//        props.put("offsets.storage", "kafka");
+//        props.put("dual.commit","true");
 
         ConsumerConfig consumerConfig = new ConsumerConfig(props);
         ConsumerConnector consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
